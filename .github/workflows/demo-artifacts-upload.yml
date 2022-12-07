@@ -27,7 +27,7 @@ jobs:
       - name: Build website
         run: npm run build
       - name: Generate Artifact with Upload Action
-        uses: actions/upload_artifact@v3
+        uses: actions/upload-artifact@v3
         with: 
           name: dist-files
           path: |
@@ -38,7 +38,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Download Generate Dist dist-files
-        uses: actions/download_artifact@v3
+        uses: actions/download-artifact@v3
         with:
           name: dist-files
       - name: Output Content Using ls Command
