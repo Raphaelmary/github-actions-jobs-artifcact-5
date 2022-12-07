@@ -1,4 +1,5 @@
-name: Deploy website
+#this demonstrates how to upload artifacts using actions/upload_artifact function in gh
+name: Artifacts Upload
 on:
   push:
     branches:
