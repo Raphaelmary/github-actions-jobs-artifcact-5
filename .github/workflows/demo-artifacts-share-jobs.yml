@@ -1,9 +1,9 @@
-#this demonstrates how to upload artifacts using actions/upload_artifact function in gh
-name: Artifacts Upload
+# this demonstrates how to share files from generated jobs
+name: Share Files from Generated Jobs
 on:
   push:
     branches:
-      - main
+      - main #main branch
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -26,9 +26,22 @@ jobs:
         run: npm ci
       - name: Build website
         run: npm run build
+      - name: Generate Artifact with Upload Action
+        uses: actions/upload-artifact@v3
+        with: 
+          name: dist-files #artifact name
+          path: | #describes where to find the path to the file
+            dist
+            package.json
   deploy:
     needs: build
     runs-on: ubuntu-latest
     steps:
+      - name: Download Generate Dist dist-files
+        uses: actions/download-artifact@v3
+        with:
+          name: dist-files
+      - name: Output Content Using ls Command
+        run: ls
       - name: Deploy
         run: echo "Deploying..."

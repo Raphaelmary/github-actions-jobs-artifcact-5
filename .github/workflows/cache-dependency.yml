@@ -1,6 +1,5 @@
-#this demonstrates how to upload artifacts using actions/upload_artifact function in github actions
-
-name: Generate and Download Artifact
+#this demonstrates how to share files from generated jobs
+name: Share Files from Generated Jobs
 on:
   push:
     branches:
@@ -11,6 +10,12 @@ jobs:
     steps:
       - name: Get code
         uses: actions/checkout@v3
+        #this single caching is used across all the jobs and not regenerated everytime. 
+      - name: Cache dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.npm #cache folder stored by github cloud
+          key: deps-node-module-${{ hashFiles('**/package-lock.json')}} #key used for retrieving and recreating update cache data when dependencies change. so the name should not be static but dynamic hashFiles function creates a hash value based on the file path specified on it.
       - name: Install dependencies
         run: npm ci
       - name: Lint code
@@ -20,18 +25,18 @@ jobs:
   build:
     needs: test
     runs-on: ubuntu-latest
-    outputs:
-      output-file: ${{ steps.publish.outputs.output-file }}
     steps:
       - name: Get code
         uses: actions/checkout@v3
+      - name: Cache dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.npm #cache folder stored by github cloud
+          key: deps-node-module-${{ hashFiles('**/package-lock.json')}} #key used for retrieving and recreating update cache data when dependencies change. so the name should not be static but dynamic hashFiles function creates a hash value based on the file path specified on it.
       - name: Install dependencies
         run: npm ci
       - name: Build website
         run: npm run build
-      - name: Retrieve File JS From Build Folder
-        id: publish
-        run: find dist/assets/*.js -type f -execdir echo '::set-output name=output-file::{}' ';'
       - name: Generate Artifact with Upload Action
         uses: actions/upload-artifact@v3
         with: 
@@ -49,9 +54,5 @@ jobs:
           name: dist-files
       - name: Output Content Using ls Command
         run: ls
-      - name: Output File Generated from Previous Build Job
-        run: echo "{{ needs.build.outputs.output-file }}"
       - name: Deploy
         run: echo "Deploying..."
-
-        #this is a comment 
